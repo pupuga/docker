@@ -1,12 +1,14 @@
-FROM php:apache
+FROM php:8.3.3-apache
 
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 
 RUN apt-get update -y
 RUN apt-get install -y apt-utils
 
-# Install important libraries
-RUN apt-get -y install git curl libcurl3-dev libxml2-dev zip openssl libfreetype6-dev libjpeg62-turbo-dev libpng-dev libsqlite3-dev cron mc 
+# Install important apps
+RUN apt-get -y install git curl libcurl3-dev libxml2-dev zip libzip-dev openssl libfreetype6-dev libjpeg62-turbo-dev libpng-dev libsqlite3-dev cron mc libmcrypt-dev
+# RUN pecl install mcrypt-1.0.6
+RUN pecl install mcrypt
                                                          
 # Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
@@ -14,6 +16,7 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 # Other PHP Extensions
 RUN docker-php-ext-configure gd --with-freetype=/usr/include/ --with-jpeg=/usr/include/ \
     && docker-php-ext-install gd
+RUN docker-php-ext-install zip
 RUN docker-php-ext-install bcmath 
 RUN docker-php-ext-install calendar  
 RUN docker-php-ext-install dba 
@@ -26,9 +29,10 @@ RUN docker-php-ext-install shmop
 RUN docker-php-ext-install sockets 
 RUN docker-php-ext-install sysvmsg 
 RUN docker-php-ext-install sysvsem 
-RUN docker-php-ext-install sysvshm  
-RUN docker-php-ext-install zend_test
+RUN docker-php-ext-install sysvshm
 RUN docker-php-ext-install soap
+RUN docker-php-ext-enable mcrypt
+
 
 # Install xdebug
 RUN apt-get update && pecl install xdebug

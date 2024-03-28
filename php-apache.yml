@@ -1,27 +1,33 @@
-version: "3.5"
+version: "3.8"
 
 services:
   mysql:
-    container_name: pupuga_mysql_7
-    build: ./mysql
+    container_name: mysqldb
+    build: ./servers/mysqldb
     command: --default-authentication-plugin=mysql_native_password
     restart: always
     ports:
       - '3306:3306'
-    volumes: 
+    volumes:
       - ${MYSQL_DATA}:/var/lib/mysql
     environment:
       - MYSQL_ROOT_HOST=%
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+  nodejs:
+    container_name: nodejs
+    build: ./servers/nodejs
+    ports:
+      - '80:8080'
   apache-php:
-    container_name: pupuga_host_7
-    build: ./servers/apache
+    container_name: apache-php
+    build: ./servers/apache-php
     restart: always
-    #extra_hosts:
+#    extra_hosts:
+#      - "win4win.loc:192.168.0.1"
     ports:
       - '80:80'
       - '443:443'
-    depends_on: 
+    depends_on:
       - mysql
     links:
       - mysql
@@ -30,7 +36,6 @@ services:
       - ${PHP_INI}:/usr/local/etc/php/php.ini
       - ${APACHE_VHOSTS}:/etc/apache2/sites-enabled/default.conf
       - ${LOG_DIR}:/var/log/
-
 #  redis:
 #    container_name: 'redis'
 #    image: redis:latest
